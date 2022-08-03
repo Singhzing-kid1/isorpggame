@@ -19,7 +19,7 @@ public class playerController : MonoBehaviour
 
     // cameraAngleChange vars start
     // private vars
-    private Vector3 angle1 = new Vector3(30, -45, 0); // w=w,a=a,s=s,d=d
+    private Vector3 angle1 = new Vector3(30, -45, 0);// w=w,a=a,s=s,d=d
     private Vector3 angle2 = new Vector3(30, -135, 0);// w=a,a=s,s=d,d=w
     private Vector3 angle3 = new Vector3(30, 135, 0);// w=s,a=d,s=w,d=a
     private Vector3 angle4 = new Vector3(30, 45, 0);// w=d,a=w,s=a,d=s
@@ -30,6 +30,26 @@ public class playerController : MonoBehaviour
     private new Transform camera;
     // cameraAngleChange vars end
 
+    // vanishRoof vars start
+    // public vars
+    public LayerMask layerMask;
+
+    // private vars
+    private MeshRenderer roof;
+
+    // serialized fields
+    [SerializeField]
+    private float transformX = 1.15f;
+
+    [SerializeField]
+    private float transformY = 1.5f;
+
+    [SerializeField]
+    private float transformZ = 1.25f;
+    // vanishRoof vars end
+
+
+
     void Update()
     {
         cameraAngleChange();
@@ -38,6 +58,7 @@ public class playerController : MonoBehaviour
     void FixedUpdate()
     {
         playerMovement();
+        vanishRoof();
     }
 
     private void playerMovement()
@@ -91,6 +112,21 @@ public class playerController : MonoBehaviour
         else if (Input.GetButtonDown("cameraAngle") && angle == 4){
             camera.rotation = Quaternion.Euler(angle1.x, angle1.y, angle1.z);
             angle = 1;
+        }
+    }
+
+    private void vanishRoof()
+    {
+        RaycastHit hit;
+
+        Vector3 alteredTransform = new Vector3(transform.position.x + transformX, transform.position.y + transformY, transform.position.z + transformZ);
+
+        if (Physics.Raycast(alteredTransform, transform.TransformDirection(Vector3.up), out hit, Mathf.Infinity, layerMask)){
+            roof = hit.collider.gameObject.GetComponent<MeshRenderer>();
+            roof.enabled = false;
+        }
+        else if(roof != null) {
+            roof.enabled = true;
         }
     }
 }
