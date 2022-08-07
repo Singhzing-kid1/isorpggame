@@ -27,6 +27,9 @@ public class cutoutObject : MonoBehaviour
         Vector3 offset = targetObject.position - transform.position;
         RaycastHit[] hitObjs = Physics.RaycastAll(transform.position, offset, offset.magnitude, roofMask);
 
+
+        Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.up), Color.red);
+
         for (int i = 0; i < hitObjs.Length; ++ i){
             Material[] materials = hitObjs[i].transform.GetComponent<Renderer>().materials;
 

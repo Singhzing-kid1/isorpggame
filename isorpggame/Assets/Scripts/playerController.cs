@@ -23,6 +23,7 @@ public class playerController : MonoBehaviour
     private Vector3 angle2 = new Vector3(30, -135, 0);// w=a,a=s,s=d,d=w
     private Vector3 angle3 = new Vector3(30, 135, 0);// w=s,a=d,s=w,d=a
     private Vector3 angle4 = new Vector3(30, 45, 0);// w=d,a=w,s=a,d=s
+    private Vector3 angle4TD = new Vector3(90, 45, 0);// w=d,a=w,s=a,d=s
     private float angle = 1;
 
     // serialized fields
@@ -33,6 +34,8 @@ public class playerController : MonoBehaviour
     // vanishRoof vars start
     // public vars
     public LayerMask layerMask;
+    public float cutoutSize = 0.1f;
+    public float falloffSize = 0.05f;
 
     // private vars
     private MeshRenderer roof;
@@ -46,6 +49,12 @@ public class playerController : MonoBehaviour
 
     [SerializeField]
     private float transformZ = 1.25f;
+
+    [SerializeField]
+    private Transform targetObject;
+
+    [SerializeField]
+    private Camera mainCamera;
     // vanishRoof vars end
 
 
@@ -53,6 +62,10 @@ public class playerController : MonoBehaviour
     void Update()
     {
         cameraAngleChange();
+
+        if (Input.GetKey("escape")){
+            Application.Quit();
+        }
     }
 
     void FixedUpdate()
@@ -117,16 +130,35 @@ public class playerController : MonoBehaviour
 
     private void vanishRoof()
     {
-        RaycastHit hit;
 
         Vector3 alteredTransform = new Vector3(transform.position.x + transformX, transform.position.y + transformY, transform.position.z + transformZ);
 
-        if (Physics.Raycast(alteredTransform, transform.TransformDirection(Vector3.up), out hit, Mathf.Infinity, layerMask)){
-            roof = hit.collider.gameObject.GetComponent<MeshRenderer>();
-            roof.enabled = false;
+        Vector2 cutoutPos = mainCamera.WorldToViewportPoint(transform.position);
+        cutoutPos.y /= (Screen.width / Screen.height);
+
+        Vector3 offset = targetObject.position - alteredTransform;
+        RaycastHit[] hitObjs = Physics.RaycastAll(alteredTransform, transform.TransformDirection(Vector3.up), Mathf.Infinity, layerMask);
+
+        if (Physics.Raycast(alteredTransform, transform.TransformDirection(Vector3.up), Mathf.Infinity, layerMask) && angle == 4){
+            camera.rotation = Quaternion.Euler(angle4TD.x, angle4TD.y, angle4TD.z);
+            Debug.DrawRay(alteredTransform, transform.TransformDirection(Vector3.up) * 1000, Color.green);
         }
-        else if(roof != null) {
-            roof.enabled = true;
+
+        else if (angle == 4) {
+            camera.rotation = Quaternion.Euler(angle4.x, angle4.y, angle4.z);
+            Debug.DrawRay(alteredTransform, transform.TransformDirection(Vector3.up) * 1000, Color.red);
         }
+
+        for (int i = 0; i < hitObjs.Length; ++ i){
+            Material[] materials = hitObjs[i].transform.GetComponent<Renderer>().materials;
+
+            for (int m = 0; m < materials.Length; ++m){
+                materials[m].SetVector("_cutoutPos", cutoutPos);
+                materials[m].SetFloat("_cutoutSize", cutoutSize);
+                materials[m].SetFloat("_falloffSize", falloffSize);
+            }
+        }
+
+
     }
 }
