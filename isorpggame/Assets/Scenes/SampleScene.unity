@@ -884,7 +884,6 @@ MonoBehaviour:
   falloffSize: 0.05
   targetObject: {fileID: 0}
   roofMask:
-    serializedVersion: 2
     m_Bits: 8
   mainCamera: {fileID: 2067713619}
 --- !u!114 &2067713622
